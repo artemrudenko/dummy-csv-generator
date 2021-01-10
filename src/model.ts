@@ -1,3 +1,5 @@
+export type SeparatorType = ',' | ';' | '\t' | '|';
+
 export interface IColumnsInfo {
   count: number;
   addId?: boolean;
@@ -13,5 +15,5 @@ export interface IGenerateInfo {
   rows: IRowsInfo;
   fileName: string;
   path?: string;
-  separator?: ',' | ';' | '\t'
+  separator?: SeparatorType;
 };

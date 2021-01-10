@@ -1,7 +1,5 @@
 import { DummyCSVGenerator } from "./dummy.csv.generator";
-import { IGenerateInfo } from "./model";
-
-export type SeparatorType = ',' | ';' | '\t';
+import { IGenerateInfo, SeparatorType } from "./model";
 
 export class CSVBuilder {
   _colCount: number = 0;
@@ -9,8 +7,13 @@ export class CSVBuilder {
   _rowCount: number = 0;
   _rowLenght: number = 0;
   _fileName: string = `result_${Date.now()}.csv`;
-  _path: string = __dirname;
+  _path: string = process.cwd();
   _separator: SeparatorType = ',';
+  _lastInfo: IGenerateInfo | undefined;
+
+  get lastInfo() {
+    return this._lastInfo;
+  }
 
   withColCount(value: number) {
     this._colCount = value;
@@ -48,13 +51,20 @@ export class CSVBuilder {
   }
 
   build() {
-    const info: IGenerateInfo = {
+    this._lastInfo = {
       rows: { count: this._rowCount, length: this._rowLenght },
       columns: { count: this._colCount, addId: this._addId },
       fileName: this._fileName,
       path: this._path,
       separator: this._separator
     };
-    return DummyCSVGenerator.create(info);
+    return this;
+  }
+
+  create() {
+    if (!!this._lastInfo) {
+      return DummyCSVGenerator.create(this._lastInfo);
+    }
+    throw new Error(`Please build generate info before creation!`);
   }
 }

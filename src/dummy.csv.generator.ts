@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { IGenerateInfo } from './model';
+import { IColumnsInfo, IGenerateInfo } from './model';
 
 export class DummyCSVGenerator {
   static getRandomChar = () => String.fromCharCode(Math.floor(Math.random() * (122 - 65) + 65));
@@ -15,8 +15,8 @@ export class DummyCSVGenerator {
 
   static generateRow(info: IGenerateInfo) {
     const cells: string[] = [];
-    for (let i = 0; i < info.columns.count; i++) {
-      cells.push(DummyCSVGenerator.getRandomString(info.rows.length));
+    for (let i = 0; i < (info.columns as IColumnsInfo).count; i++) {
+      cells.push(DummyCSVGenerator.getRandomString(info.rows.length || 10));
     }
     const result = cells.join(!!info.separator ? info.separator : ',') + '\n';
     return result;

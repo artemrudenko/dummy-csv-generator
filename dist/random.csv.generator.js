@@ -55,51 +55,65 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DummyCSVGenerator = void 0;
+exports.RandomCSVGenerator = void 0;
 var fs = __importStar(require("fs"));
 var path = __importStar(require("path"));
-var DummyCSVGenerator = /** @class */ (function () {
-    function DummyCSVGenerator() {
+var lodash_1 = require("lodash");
+var generator_1 = require("./generator");
+var RandomCSVGenerator = /** @class */ (function () {
+    function RandomCSVGenerator() {
     }
-    DummyCSVGenerator.getRandomString = function (length) {
-        var result = '';
-        for (var i = 0; i < length; i++) {
-            result += DummyCSVGenerator.getRandomChar();
+    RandomCSVGenerator.generateRows = function (info) {
+        var columns = [];
+        for (var i = 0; i < info.columns.headers.length; i++) {
+            var column = info.columns.headers[i];
+            columns.push(generator_1.generateColumn(column.valueType, info.rows.count));
         }
-        return result;
+        return lodash_1.zip.apply(void 0, columns);
     };
-    DummyCSVGenerator.generateRow = function (info) {
-        var cells = [];
-        for (var i = 0; i < info.columns.count; i++) {
-            cells.push(DummyCSVGenerator.getRandomString(info.rows.length || 10));
-        }
-        var result = cells.join(!!info.separator ? info.separator : ',') + '\n';
-        return result;
-    };
-    DummyCSVGenerator.create = function (info) {
+    RandomCSVGenerator.create = function (info) {
         return __awaiter(this, void 0, void 0, function () {
+            var separator;
             return __generator(this, function (_a) {
+                separator = !!info.separator ? info.separator : ',';
                 return [2 /*return*/, new Promise(function (resolve) {
                         var filePath = !!info.fileName ? info.fileName : "dummy" + info.rows.count + ".csv";
                         if (!!info.path) {
                             filePath = path.join(info.path, filePath);
                         }
+                        // Open Stream
                         var stream = fs.createWriteStream(filePath);
-                        for (var i = 0; i < info.rows.count; i++) {
+                        // Write header
+                        if (!!info.withHeaders) {
+                            var captions_1 = [];
+                            if (!!info.columns.addId) {
+                                captions_1.push('ID');
+                            }
+                            ;
+                            info.columns.headers.forEach(function (info) {
+                                captions_1.push(!!info.caption ? info.caption : info.valueType.toUpperCase());
+                            });
+                            stream.write(captions_1.join(separator) + "\n", 'utf8');
+                        }
+                        // Write body
+                        var i = 0;
+                        for (var _i = 0, _a = RandomCSVGenerator.generateRows(info); _i < _a.length; _i++) {
+                            var row = _a[_i];
                             var rowStr = '';
                             if (info.columns.addId) {
-                                rowStr += "" + (i + 1) + info.separator;
+                                rowStr += "" + (i + 1) + separator;
                             }
-                            rowStr += DummyCSVGenerator.generateRow(info);
+                            rowStr += row.join(separator) + "\n";
                             stream.write(rowStr, 'utf8');
+                            i++;
                         }
+                        // Close
                         stream.on('close', function () { return resolve(true); });
                         stream.end();
                     })];
             });
         });
     };
-    DummyCSVGenerator.getRandomChar = function () { return String.fromCharCode(Math.floor(Math.random() * (122 - 65) + 65)); };
-    return DummyCSVGenerator;
+    return RandomCSVGenerator;
 }());
-exports.DummyCSVGenerator = DummyCSVGenerator;
+exports.RandomCSVGenerator = RandomCSVGenerator;

@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 
-import { DummyCSVGenerator, IGenerateInfo } from '.';
+import { IGenerateInfo } from './model';
+import { DummyCSVGenerator } from './dummy.csv.generator';
 
 describe(`Dummy CSV file Generator::`, () => {
   test(`should allow to generate empty csv file`, async () => {

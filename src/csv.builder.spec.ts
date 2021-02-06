@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 
 import { CSVBuilder } from './csv.builder';
+import { DummyCSVGenerator } from './dummy.csv.generator';
+import { RandomCSVGenerator } from './random.csv.generator';
 
 describe(`CSVBuilder::`, () => {
   test(`should create builder`, async () => {
@@ -50,6 +52,36 @@ describe(`CSVBuilder::`, () => {
       .withFileName(fileName)
       .build()
       .create();
+    // Verify
+    expect(fs.existsSync(fileName))
+      .toBeTruthy();
+  });
+
+  test(`should allow to create types csv file`, async () => {
+    jest.spyOn(DummyCSVGenerator, 'create');
+    jest.spyOn(RandomCSVGenerator, 'create');
+    // Arrange
+    const fileName = `typed-test-${Date.now()}.csv`;
+    // Act
+    await new CSVBuilder()
+      .withColumnsInfo({
+        headers: [
+          { valueType: 'address' },
+          { valueType: 'age' },
+          { valueType: 'email' }
+        ],
+        addId: true
+      })
+      .withRowCount(3)
+      .withFileName(fileName)
+      .build()
+      .create();
+
+    expect(DummyCSVGenerator.create)
+      .not.toBeCalled();
+    expect(RandomCSVGenerator.create)
+      .toBeCalled();
+
     // Verify
     expect(fs.existsSync(fileName))
       .toBeTruthy();

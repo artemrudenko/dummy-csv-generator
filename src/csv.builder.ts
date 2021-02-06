@@ -1,5 +1,6 @@
 import { DummyCSVGenerator } from "./dummy.csv.generator";
-import { IGenerateInfo, SeparatorType } from "./model";
+import { RandomCSVGenerator } from "./random.csv.generator";
+import { ITypedColumnsInfo, IGenerateInfo, SeparatorType, IColumnsInfo } from "./model";
 
 export class CSVBuilder {
   _colCount: number = 0;
@@ -10,6 +11,7 @@ export class CSVBuilder {
   _path: string = process.cwd();
   _separator: SeparatorType = ',';
   _lastInfo: IGenerateInfo | undefined;
+  _columnsInfo: IColumnsInfo | ITypedColumnsInfo | undefined;
 
   get lastInfo() {
     return this._lastInfo;
@@ -17,6 +19,11 @@ export class CSVBuilder {
 
   withColCount(value: number) {
     this._colCount = value;
+    return this;
+  }
+
+  withColumnsInfo(value: ITypedColumnsInfo | IColumnsInfo) {
+    this._columnsInfo = value;
     return this;
   }
 
@@ -51,19 +58,27 @@ export class CSVBuilder {
   }
 
   build() {
+    const columns = !!this._columnsInfo ?
+      this._columnsInfo :
+      { addId: this._addId, count: this._colCount };
     this._lastInfo = {
       rows: { count: this._rowCount, length: this._rowLenght },
-      columns: { count: this._colCount, addId: this._addId },
+      columns,
       fileName: this._fileName,
       path: this._path,
       separator: this._separator
     };
+
+    this._lastInfo.withHeaders = Object.getOwnPropertyNames(columns).includes('headers')
     return this;
   }
 
   create() {
     if (!!this._lastInfo) {
-      return DummyCSVGenerator.create(this._lastInfo);
+      return this._lastInfo.withHeaders
+        ? RandomCSVGenerator.create(this._lastInfo)
+        : DummyCSVGenerator.create(this._lastInfo);
+
     }
     throw new Error(`Please build generate info before creation!`);
   }

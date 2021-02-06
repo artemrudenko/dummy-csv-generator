@@ -1,8 +1,11 @@
 export type SeparatorType = ',' | ';' | '\t' | '|';
 
-export interface IColumnsInfo {
-  count: number;
+export interface IBaseColumnsInfo {
   addId?: boolean;
+};
+
+export interface IColumnsInfo extends IBaseColumnsInfo {
+  count: number;
 };
 
 export type RandomTypes = 'pick' | 'bool' | 'character' | 'float' | 'integer' | 'natural' | 'string' | 'paragraph' |
@@ -15,9 +18,8 @@ export interface IColumnInfo {
   valueType: RandomTypes;
 }
 
-export interface ITypedColumnsInfo {
+export interface ITypedColumnsInfo extends IBaseColumnsInfo {
   headers: IColumnInfo[];
-  addId?: boolean;
 };
 
 export interface IRowsInfo {
